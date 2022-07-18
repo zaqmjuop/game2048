@@ -13,10 +13,10 @@
       <p>Join the numbers and get to the <b>2048 tile!</b></p>
       </p>
       <div>
-        <Btn text="New Game" @click="startGame" />
+        <Btn @click="startGame">New Game</Btn>
       </div>
     </div>
-    <Stage :triggerStart="triggerStart"/>
+    <Stage :triggerStart="triggerStart" />
   </div>
 
 </template>

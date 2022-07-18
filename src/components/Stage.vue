@@ -4,18 +4,24 @@
     <template v-for="(count, index) in counts">
       <Count v-if="!!count" :count="count" :index="index" />
     </template>
+    <Win v-if="status === GAME_STATUS.win" @try-again="start" />
+    <GameOver v-else-if="status === GAME_STATUS.gameover" @try-again="start" />
   </div>
 </template>
 <script setup lang="ts">
 import Count from './Count.vue'
-import { DIR_KEYS } from '../metaData'
+import { DIR_KEYS, GAME_STATUS, valueof } from '../metaData'
 import { ArrayElementType } from '../type'
 import { ref, reactive, onBeforeMount, onBeforeUnmount, watch } from 'vue';
 import { includes } from '../utils';
+import Win from './Win.vue'
+import GameOver from './GameOver.vue'
 
 const props = defineProps<{
   triggerStart: boolean;
 }>();
+
+const status = ref<valueof<typeof GAME_STATUS>>(GAME_STATUS.playing)
 
 const counts = reactive<number[]>([128, 64, 2, 16, 8, 32, 16, 8, 4, 16, 8, 4, 16, 8, 4, 2])
 // new Array(16).fill(0)
@@ -25,6 +31,13 @@ const stack: Array<ArrayElementType<typeof DIR_KEYS>> = reactive([])
 
 
 const onKeyUp = (e: KeyboardEvent) => {
+  if (status.value !== GAME_STATUS.playing) {
+    console.log(e)
+    if(e.key === 'Enter'){
+      start()
+    }
+    return
+  }
   const key = e.key
   if (includes(key, DIR_KEYS)) {
     stack.push(key);
@@ -75,6 +88,9 @@ const insertRandomBlock = () => {
 }
 
 const step = () => {
+  if (status.value !== GAME_STATUS.playing) {
+    return
+  }
   const key = stack.shift()
   let hasChange = false
   switch (key) {
@@ -148,7 +164,7 @@ const step = () => {
   } else {
     const isLose = !counts.includes(0)
     if (isLose) {
-      console.log('isLose')
+      status.value = GAME_STATUS.gameover
     }
   }
 }
@@ -158,6 +174,7 @@ const start = () => {
   counts.splice(0, counts.length, ...new Array(16).fill(0))
   insertRandomBlock()
   insertRandomBlock()
+  status.value = GAME_STATUS.playing
 }
 
 watch(() => props.triggerStart, () => { start() })

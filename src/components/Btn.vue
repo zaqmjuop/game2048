@@ -1,10 +1,9 @@
 <template>
-  <button class="primary" @click="emit('click')">{{ text }}</button>
+  <button class="primary" @click="emit('click')">
+    <slot></slot>
+  </button>
 </template>
 <script setup lang="ts">
-const props = defineProps<{
-  text: string;
-}>();
 const emit = defineEmits<{
   (e: 'click', payload?: any): void
 }>()

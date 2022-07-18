@@ -2,11 +2,7 @@ body {
   background-color: #fafaee;
   color: #776e65;
 }
-.between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+
 h1,
 h2,
 h3,
@@ -23,6 +19,32 @@ h1 {
   color: #776e65;
   font-size: 64px;
   font-weight: 900;
+}
+h2 {
+  color: #fff;
+  font-size: 48px;
+  font-weight: 900;
+}
+.mask {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.vertical-center {
+  margin-top: 50%;
+  transform: translateY(-50%);
+}
+.text-center {
+  text-align: center;
+  vertical-align: middle;
+}
+.between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .block {
   background-color: #cdc1b4;
