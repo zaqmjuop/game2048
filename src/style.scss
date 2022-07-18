@@ -24,3 +24,12 @@ h1 {
   font-size: 64px;
   font-weight: 900;
 }
+.block {
+  background-color: #cdc1b4;
+  width: 11.25em;
+  height: 11.25em;
+  display: inline-block;
+  vertical-align: top;
+  padding: 1em 0 0 1em;
+  background-clip: content-box;
+}
