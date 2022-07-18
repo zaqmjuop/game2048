@@ -21,6 +21,13 @@ const props = defineProps<{
   triggerStart: boolean;
 }>();
 
+const emit = defineEmits<{
+  (e: 'score', payload: number): void,
+  (e: 'start'): void,
+  (e: 'win'): void,
+  (e: 'gameover'): void,
+}>()
+
 const status = ref<valueof<typeof GAME_STATUS>>(GAME_STATUS.playing)
 
 const counts = reactive<number[]>([128, 64, 2, 16, 8, 32, 16, 8, 4, 16, 8, 4, 16, 8, 4, 2])
@@ -32,8 +39,7 @@ const stack: Array<ArrayElementType<typeof DIR_KEYS>> = reactive([])
 
 const onKeyUp = (e: KeyboardEvent) => {
   if (status.value !== GAME_STATUS.playing) {
-    console.log(e)
-    if(e.key === 'Enter'){
+    if (e.key === 'Enter') {
       start()
     }
     return
@@ -44,7 +50,7 @@ const onKeyUp = (e: KeyboardEvent) => {
   }
   step()
 }
-
+let score = 0
 const slideLine = (line: number[]) => {
   const merge = () => {
     for (let i = line.length - 1; i >= 1; i--) {
@@ -55,6 +61,7 @@ const slideLine = (line: number[]) => {
         line[i] = 0
       } else if (line[i - 1] === line[i]) {
         line[i] *= 2
+        score += line[i]
         line[i - 1] = 0
       }
     }
@@ -72,6 +79,7 @@ const slideLine = (line: number[]) => {
   }
   merge()
   slide()
+
   return line
 }
 
@@ -93,6 +101,7 @@ const step = () => {
   }
   const key = stack.shift()
   let hasChange = false
+  score = 0
   switch (key) {
     case 'ArrowRight':
       for (let row = 0; row < 4; row++) {
@@ -160,11 +169,21 @@ const step = () => {
       break;
   }
   if (hasChange) {
-    insertRandomBlock()
+    if (score) {
+      emit('score', score)
+      score = 0
+    }
+    const isWin = counts.find(num => num >= 2048)
+    if (isWin) {
+      emit('win')
+    } else {
+      insertRandomBlock()
+    }
   } else {
     const isLose = !counts.includes(0)
     if (isLose) {
       status.value = GAME_STATUS.gameover
+      emit('gameover')
     }
   }
 }
@@ -175,6 +194,7 @@ const start = () => {
   insertRandomBlock()
   insertRandomBlock()
   status.value = GAME_STATUS.playing
+  emit('start')
 }
 
 watch(() => props.triggerStart, () => { start() })

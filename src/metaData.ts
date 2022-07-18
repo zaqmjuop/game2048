@@ -11,4 +11,5 @@ export const GAME_STATUS = {
   gameover: 2,
 } as const;
 
+export const BEST_SCORE_KEY = 'bestScore'
 export type valueof<T extends object> = T[keyof T]

@@ -3,8 +3,8 @@
     <div class="between">
       <h1>2048</h1>
       <span>
-        <ScoreBoard label="SCORE" :score="0"></ScoreBoard>
-        <ScoreBoard label="BEST" :score="0"></ScoreBoard>
+        <ScoreBoard label="SCORE" :score="score"></ScoreBoard>
+        <ScoreBoard label="BEST" :score="bestScore"></ScoreBoard>
       </span>
     </div>
     <div class="between">
@@ -16,7 +16,7 @@
         <Btn @click="startGame">New Game</Btn>
       </div>
     </div>
-    <Stage :triggerStart="triggerStart" />
+    <Stage :triggerStart="triggerStart" @score="score += $event" @start="onStart" />
   </div>
 
 </template>
@@ -24,12 +24,26 @@
 import Stage from "./components/Stage.vue";
 import ScoreBoard from "./components/ScoreBoard.vue";
 import Btn from "./components/Btn.vue";
-import { ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
+import { BEST_SCORE_KEY } from "./metaData";
 const triggerStart = ref(false)
+const score = ref(0)
+const bestScore = ref(0)
+const updateBestScore = () => {
+  const newBestScore = Math.max(Number(localStorage.getItem(BEST_SCORE_KEY)) || 0, score.value)
+  bestScore.value = newBestScore
+  localStorage.setItem(BEST_SCORE_KEY, `${bestScore.value}`)
+}
 const startGame = () => {
-  console.log('startGame')
   triggerStart.value = !triggerStart.value
 }
+const onStart = () => {
+  updateBestScore()
+  score.value = 0
+}
+onMounted(() => {
+  startGame()
+}) 
 </script>
 <style scoped lang="scss">
 .game2048 {
