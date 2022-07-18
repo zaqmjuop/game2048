@@ -30,7 +30,9 @@ const emit = defineEmits<{
 
 const status = ref<valueof<typeof GAME_STATUS>>(GAME_STATUS.playing)
 
-const counts = reactive<number[]>([128, 64, 2, 16, 8, 32, 16, 8, 4, 16, 8, 4, 16, 8, 4, 2])
+const counts = reactive<number[]>(new Array(16).fill(0))
+counts[0] = 2
+counts[1] = 2
 // new Array(16).fill(0)
 
 const stack: Array<ArrayElementType<typeof DIR_KEYS>> = reactive([])

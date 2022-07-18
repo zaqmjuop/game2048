@@ -42,7 +42,7 @@ const onStart = () => {
   score.value = 0
 }
 onMounted(() => {
-  startGame()
+  // startGame()
 }) 
 </script>
 <style scoped lang="scss">
