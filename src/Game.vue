@@ -16,7 +16,7 @@
         <Btn text="New Game" @click="startGame" />
       </div>
     </div>
-    <Stage />
+    <Stage :triggerStart="triggerStart"/>
   </div>
 
 </template>
@@ -24,8 +24,11 @@
 import Stage from "./components/Stage.vue";
 import ScoreBoard from "./components/ScoreBoard.vue";
 import Btn from "./components/Btn.vue";
+import { ref } from "vue";
+const triggerStart = ref(false)
 const startGame = () => {
   console.log('startGame')
+  triggerStart.value = !triggerStart.value
 }
 </script>
 <style scoped lang="scss">
