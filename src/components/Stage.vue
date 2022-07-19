@@ -79,7 +79,6 @@ const onKeyUp = (e: KeyboardEvent) => {
   }
   step();
 };
-let score = 0;
 
 const insertRandomBlock = () => {
   const positions: number[] = [
@@ -106,6 +105,7 @@ const runCommond = (
   positions: number[] | readonly number[],
   commonds: Array<{ type: string; data1: number; data2: number }>
 ) => {
+  let score = 0;
   const mergeCommonds: Array<{ type: string; data1: number; data2: number }> =
     [];
   const silderCommonds: Array<{ type: string; data1: number; data2: number }> =
@@ -140,6 +140,7 @@ const runCommond = (
         score += block2.value;
       }
     });
+    emit("score", score);
   }, 200);
 };
 
@@ -197,13 +198,8 @@ const step = () => {
   if (!key) {
     return;
   }
-  score = 0;
   const res = runStep(key);
   if (res.hasChange) {
-    if (score) {
-      emit("score", score);
-      score = 0;
-    }
     const isWin = blocks.find((block) => block.value >= 2048);
     if (isWin) {
       emit("win");
