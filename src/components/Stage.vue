@@ -26,7 +26,7 @@ import {
   watch,
   onMounted,
 } from "vue";
-import { getId, includes, slideLine } from "../utils";
+import { getId, includes, sleep, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
 
@@ -104,7 +104,7 @@ const insertRandomBlock = () => {
   blocks.push(block);
 };
 
-const playStep = (
+const playStep = async (
   row: Array<Block | undefined>,
   positions: number[] | readonly number[],
   commonds: Array<{ type: string; data1: number; data2: number }>
@@ -121,16 +121,18 @@ const playStep = (
       silderCommonds.push(commond);
     }
   });
-  silderCommonds.forEach(({ data1, data2 }) => {
-    if (!data1) {
-      console.log("positions", data1, data2, positions, row);
-    }
-
-    const block = row[data1];
-    block && (block.position = positions[data2]);
-  });
-  setTimeout(() => {
-    mergeCommonds.forEach(({ data1, data2 }) => {
+  await Promise.all(
+    silderCommonds.map(({ data1, data2 }) => {
+      if (!data1) {
+        console.log("positions", data1, data2, positions, row);
+      }
+      const block = row[data1];
+      block && (block.position = positions[data2]);
+    })
+  );
+  await sleep(200);
+  await Promise.all(
+    mergeCommonds.map(({ data1, data2 }) => {
       const block1 = row[data1];
       const block2 = row[data2];
       if (block1) {
@@ -143,29 +145,33 @@ const playStep = (
         block2.value *= 2;
         score += block2.value;
       }
-    });
-    emit("score", score);
-  }, 200);
+    })
+  );
+  emit("score", score);
 };
 
-const runCommand = (key: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight") => {
+const runCommand = async (
+  key: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight"
+) => {
   let hasChange = false;
   const lines = LINE_MAP[key];
   const positionMap: Record<number, Block> = {};
   blocks.forEach((block) => {
     positionMap[block.position] = block;
   });
-  for (let i = 0; i < lines.length; i++) {
-    const row: Array<Block | undefined> = lines[i].map(
-      (position) => positionMap[position]
-    );
-    const res = slideLine(row.map((block) => block?.value || 0));
-    const lineChange = res.commonds.length;
-    if (lineChange) {
-      hasChange = true;
-    }
-    playStep(row, lines[i] as readonly number[], res.commonds);
-  }
+  await Promise.all(
+    lines.map(async (line) => {
+      const row: Array<Block | undefined> = line.map(
+        (position) => positionMap[position]
+      );
+      const res = slideLine(row.map((block) => block?.value || 0));
+      const lineChange = res.commonds.length;
+      if (lineChange) {
+        hasChange = true;
+      }
+      return playStep(row, line as number[], res.commonds);
+    })
+  );
   return { hasChange };
 };
 
@@ -202,13 +208,13 @@ const runStep = async () => {
   if (!key) {
     return;
   }
-  const res = runCommand(key);
+  const res = await runCommand(key);
   if (res.hasChange) {
     const isWin = blocks.find((block) => block.value >= 2048);
     if (isWin) {
       emit("win");
     } else {
-      setTimeout(() => insertRandomBlock(), 200);
+      insertRandomBlock();
     }
   } else {
     const isLose = isGameOver();

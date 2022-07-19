@@ -52,3 +52,10 @@ export const slideLine = (line: number[]) => {
 // slideLine([2, 2, 2, 2]);
 let id = 0;
 export const getId = () => `${id >= Number.MAX_SAFE_INTEGER ? (id = 0) : id++}`;
+
+export const sleep = (mesc: number) =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(mesc);
+    }, mesc);
+  });
