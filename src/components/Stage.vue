@@ -30,7 +30,7 @@ import { getId, includes, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
 
-const defaultBlocks = (): Block[] => [
+const mock = (): Block[] => [
   { id: getId(), value: 2, position: 0 },
   { id: getId(), value: 2, position: 1 },
   { id: getId(), value: 3, position: 2 },
@@ -48,6 +48,8 @@ const defaultBlocks = (): Block[] => [
   { id: getId(), value: 15, position: 14 },
   { id: getId(), value: 16, position: 15 },
 ];
+
+const defaultBlocks = (): Block[] => [];
 
 const props = defineProps<{
   triggerStart: boolean;
