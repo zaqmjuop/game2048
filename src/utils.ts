@@ -59,3 +59,7 @@ export const sleep = (mesc: number) =>
       resolve(mesc);
     }, mesc);
   });
+export const sleepFrame = () =>
+  new Promise((resolve) => {
+    window.requestAnimationFrame(() => resolve(0));
+  });

@@ -1,15 +1,12 @@
 <template>
   <div class="stage">
     <span v-for="block in 16" class="block"></span>
-
-    <template v-for="block in blocks">
-      <Count
-        v-if="block.value"
-        :key="block.id"
-        :count="block.value"
-        :position="block.position"
-      />
-    </template>
+    <Count
+      v-for="block in blocks"
+      :key="block.id"
+      :count="block.value"
+      :position="block.position"
+    />
     <Win v-if="status === GAME_STATUS.win" @try-again="start" />
     <GameOver v-else-if="status === GAME_STATUS.gameover" @try-again="start" />
   </div>
@@ -26,7 +23,7 @@ import {
   watch,
   onMounted,
 } from "vue";
-import { getId, includes, sleep, slideLine } from "../utils";
+import { getId, includes, sleep, sleepFrame, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
 
@@ -81,7 +78,7 @@ const onKeyUp = (e: KeyboardEvent) => {
   if (includes(key, DIR_KEYS)) {
     stack.push(key);
   }
-  promise = promise.then(() => runStep());
+  promise = promise.then(() => sleepFrame()).then(() => runStep());
 };
 
 const insertRandomBlock = () => {
@@ -123,9 +120,6 @@ const playStep = async (
   });
   await Promise.all(
     silderCommonds.map(({ data1, data2 }) => {
-      if (!data1) {
-        console.log("positions", data1, data2, positions, row);
-      }
       const block = row[data1];
       block && (block.position = positions[data2]);
     })
@@ -214,6 +208,7 @@ const runStep = async () => {
     if (isWin) {
       emit("win");
     } else {
+      await sleepFrame()
       insertRandomBlock();
     }
   } else {

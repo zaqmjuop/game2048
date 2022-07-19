@@ -1,14 +1,15 @@
 <template>
   <span
-    v-if="count"
     class="block slider"
-    :style="{ transform: `translate(${offset.left}00%, ${offset.top}00%)` }"
+    :style="{
+      transform: `translate(${offset.left}00%, ${offset.top}00%) scale(${scale})`,
+    }"
   >
     <p class="count">{{ count }}</p>
   </span>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 
 const props = defineProps<{
   count: number;
@@ -20,6 +21,11 @@ const offset = computed(() => {
   const top = (props.position - left) / 4;
   return { left, top };
 });
+const scale = ref(0);
+
+onBeforeMount(() => {
+  window.requestAnimationFrame(() => (scale.value = props.count ? 1 : 0));
+});
 </script>
 <style lang="scss" scoped>
 .slider {
@@ -28,6 +34,7 @@ const offset = computed(() => {
   left: 0;
   background-color: #ede4da;
   transition: all 0.2s;
+  transform-origin: center;
 }
 
 .count {
