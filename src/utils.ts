@@ -9,7 +9,7 @@ export const includes = <T extends any[] | readonly any[]>(
 
 export const slideLine = (line: number[]) => {
   const commonds: Array<{ type: string; data1: number; data2: number }> = [];
-  const res:number[] = new Array(line.length).fill(0);
+  const res: number[] = new Array(line.length).fill(0);
   let resI = res.length - 1;
   for (let i = line.length - 1; i >= 0; i--) {
     if (!line[i]) {
@@ -20,11 +20,15 @@ export const slideLine = (line: number[]) => {
         i !== resI && commonds.push({ type: "silder", data1: i, data2: resI });
       } else if (res[resI] === line[i]) {
         res[resI] *= 2; // 滑动 +合并
-        const prevCommond = commonds[commonds.length-1]
-        let mergeData2 = resI
-        if(prevCommond && prevCommond.type === 'silder' && prevCommond.data2===resI){
+        const prevCommond = commonds[commonds.length - 1];
+        let mergeData2 = resI;
+        if (
+          prevCommond &&
+          prevCommond.type === "silder" &&
+          prevCommond.data2 === resI
+        ) {
           // 站位值是后滑动过来的
-          mergeData2 = prevCommond.data1
+          mergeData2 = prevCommond.data1;
         }
         commonds.push({ type: "silder", data1: i, data2: resI });
         commonds.push({ type: "merge", data1: i, data2: mergeData2 });
@@ -36,7 +40,7 @@ export const slideLine = (line: number[]) => {
       }
     }
   }
-  return {line, res, commonds};
+  return { line, res, commonds };
 };
 // slideLine([0, 2, 4, 8]);
 // slideLine([2, 0, 0, 0]);
@@ -46,5 +50,5 @@ export const slideLine = (line: number[]) => {
 // slideLine([0, 2, 2, 2]);
 // slideLine([2, 2, 0, 2]);
 // slideLine([2, 2, 2, 2]);
-
-export const getId = () => {}
+let id = 0;
+export const getId = () => `${id >= Number.MAX_SAFE_INTEGER ? (id = 0) : id++}`;

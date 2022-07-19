@@ -26,20 +26,18 @@ import {
   watch,
   onMounted,
 } from "vue";
-import { includes, slideLine } from "../utils";
+import { getId, includes, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
 
-
-
 const defaultBlocks = (): Block[] => [
-  { id: "0", value: 2, position: 0 },
-  { id: "1", value: 2, position: 1 },
-  { id: "2", value: 2, position: 2 },
-  { id: "3", value: 2, position: 3 },
-  { id: "4", value: 2, position: 4 },
-  { id: "5", value: 2, position: 5 },
-  { id: "6", value: 2, position: 13 },
+  { id: getId(), value: 2, position: 0 },
+  { id: getId(), value: 2, position: 1 },
+  { id: getId(), value: 2, position: 2 },
+  { id: getId(), value: 2, position: 3 },
+  { id: getId(), value: 2, position: 4 },
+  { id: getId(), value: 2, position: 5 },
+  { id: getId(), value: 2, position: 13 },
 ];
 
 const props = defineProps<{
@@ -87,7 +85,7 @@ const insertRandomBlock = () => {
   const i = Math.trunc(Math.random() * positions.length);
   const flag = positions[i];
   const block: Block = {
-    id: blocks.length.toString(),
+    id: getId(),
     value: 2,
     position: flag,
   };
