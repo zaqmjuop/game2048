@@ -236,7 +236,7 @@ watch(
 onBeforeMount(() => {
   document.addEventListener("keyup", onKeyUp);
 });
-onMounted(() => {});
+onMounted(() => {start()});
 onBeforeUnmount(() => {
   document.removeEventListener("keyup", onKeyUp);
 });
