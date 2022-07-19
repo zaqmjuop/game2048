@@ -6,3 +6,5 @@ export interface Block {
   value: number;
   position: number;
 }
+
+export type Line = [number, number, number, number];

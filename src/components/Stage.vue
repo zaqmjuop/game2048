@@ -16,8 +16,8 @@
 </template>
 <script setup lang="ts">
 import Count from "./Count.vue";
-import { DIR_KEYS, GAME_STATUS, valueof } from "../metaData";
-import { ArrayElementType, Block } from "../type";
+import { DIR_KEYS, GAME_STATUS, LINE_MAP, valueof } from "../metaData";
+import { ArrayElementType, Block, Line } from "../type";
 import {
   ref,
   reactive,
@@ -33,11 +33,20 @@ import GameOver from "./GameOver.vue";
 const defaultBlocks = (): Block[] => [
   { id: getId(), value: 2, position: 0 },
   { id: getId(), value: 2, position: 1 },
-  { id: getId(), value: 2, position: 2 },
-  { id: getId(), value: 2, position: 3 },
-  { id: getId(), value: 2, position: 4 },
-  { id: getId(), value: 2, position: 5 },
-  { id: getId(), value: 2, position: 13 },
+  { id: getId(), value: 3, position: 2 },
+  { id: getId(), value: 4, position: 3 },
+  { id: getId(), value: 5, position: 4 },
+  { id: getId(), value: 6, position: 5 },
+  { id: getId(), value: 7, position: 6 },
+  { id: getId(), value: 8, position: 7 },
+  { id: getId(), value: 9, position: 8 },
+  { id: getId(), value: 10, position: 9 },
+  { id: getId(), value: 11, position: 10 },
+  { id: getId(), value: 12, position: 11 },
+  { id: getId(), value: 13, position: 12 },
+  { id: getId(), value: 14, position: 13 },
+  { id: getId(), value: 15, position: 14 },
+  { id: getId(), value: 16, position: 15 },
 ];
 
 const props = defineProps<{
@@ -94,7 +103,7 @@ const insertRandomBlock = () => {
 
 const runCommond = (
   row: Array<Block | undefined>,
-  positions: number[],
+  positions: number[] | readonly number[],
   commonds: Array<{ type: string; data1: number; data2: number }>
 ) => {
   const mergeCommonds: Array<{ type: string; data1: number; data2: number }> =
@@ -119,15 +128,65 @@ const runCommond = (
   setTimeout(() => {
     mergeCommonds.forEach(({ data1, data2 }) => {
       const block1 = row[data1];
+      const block2 = row[data2];
       if (block1) {
         const index = blocks.indexOf(block1);
         if (index > -1) {
           blocks.splice(index, 1);
         }
       }
-      (row[data2] as Block).value *= 2;
+      if (block2) {
+        block2.value *= 2;
+        score += block2.value;
+      }
     });
   }, 200);
+};
+
+const runStep = (key: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight") => {
+  let hasChange = false;
+  const lines = LINE_MAP[key];
+  const positionMap: Record<number, Block> = {};
+  blocks.forEach((block) => {
+    positionMap[block.position] = block;
+  });
+  for (let i = 0; i < lines.length; i++) {
+    const row: Array<Block | undefined> = lines[i].map(
+      (position) => positionMap[position]
+    );
+    const res = slideLine(row.map((block) => block?.value || 0));
+    const lineChange = res.commonds.length;
+    if (lineChange) {
+      hasChange = true;
+    }
+    runCommond(row, lines[i] as readonly number[], res.commonds);
+  }
+  return { hasChange };
+};
+
+const isGameOver = () => {
+  if (blocks.length < 16) {
+    return false;
+  }
+  const positionMap: Record<number, number> = {};
+  blocks.forEach((block) => {
+    positionMap[block.position] = block.value;
+  });
+
+  const isOverLine = (positions: Line) => {
+    return positions.every((position, index) => {
+      return (
+        index >= positions.length - 1 ||
+        positionMap[position] !== positionMap[positions[index + 1]]
+      );
+    });
+  };
+
+  return [LINE_MAP.ArrowRight, LINE_MAP.ArrowDown].every((map) => {
+    return map.every((line) => {
+      return isOverLine(line);
+    });
+  });
 };
 
 const step = () => {
@@ -135,105 +194,12 @@ const step = () => {
     return;
   }
   const key = stack.shift();
-  let hasChange = false;
-  score = 0;
-  switch (key) {
-    case "ArrowRight":
-      var lines = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [8, 9, 10, 11],
-        [12, 13, 14, 15],
-      ];
-      var positionMap: Record<number, Block> = {};
-      blocks.forEach((block) => {
-        positionMap[block.position] = block;
-      });
-      for (let i = 0; i < lines.length; i++) {
-        const row: Array<Block | undefined> = lines[i].map(
-          (position) => positionMap[position]
-        );
-        const res = slideLine(row.map((block) => block?.value || 0));
-        const lineChange = res.commonds.length;
-        if (lineChange) {
-          hasChange = true;
-        }
-        runCommond(row, lines[i], res.commonds);
-      }
-      break;
-    case "ArrowDown":
-      var lines = [
-        [0, 4, 8, 12],
-        [1, 5, 9, 13],
-        [2, 6, 10, 14],
-        [3, 7, 11, 15],
-      ];
-      var positionMap: Record<number, Block> = {};
-      blocks.forEach((block) => {
-        positionMap[block.position] = block;
-      });
-      for (let i = 0; i < lines.length; i++) {
-        const row: Array<Block | undefined> = lines[i].map(
-          (position) => positionMap[position]
-        );
-        const res = slideLine(row.map((block) => block?.value || 0));
-        const lineChange = res.commonds.length;
-        if (lineChange) {
-          hasChange = true;
-        }
-        runCommond(row, lines[i], res.commonds);
-      }
-      break;
-    case "ArrowUp":
-      var lines = [
-        [12, 8, 4, 0],
-        [13, 9, 5, 1],
-        [14, 10, 6, 2],
-        [15, 11, 7, 3],
-      ];
-      var positionMap: Record<number, Block> = {};
-      blocks.forEach((block) => {
-        positionMap[block.position] = block;
-      });
-      for (let i = 0; i < lines.length; i++) {
-        const row: Array<Block | undefined> = lines[i].map(
-          (position) => positionMap[position]
-        );
-        const res = slideLine(row.map((block) => block?.value || 0));
-        const lineChange = res.commonds.length;
-        if (lineChange) {
-          hasChange = true;
-        }
-        runCommond(row, lines[i], res.commonds);
-      }
-      break;
-    case "ArrowLeft":
-      var lines = [
-        [3, 2, 1, 0],
-        [7, 6, 5, 4],
-        [11, 10, 9, 8],
-        [15, 14, 13, 12],
-      ];
-      var positionMap: Record<number, Block> = {};
-      blocks.forEach((block) => {
-        positionMap[block.position] = block;
-      });
-      for (let i = 0; i < lines.length; i++) {
-        const row: Array<Block | undefined> = lines[i].map(
-          (position) => positionMap[position]
-        );
-        const res = slideLine(row.map((block) => block?.value || 0));
-        const lineChange = res.commonds.length;
-        if (lineChange) {
-          hasChange = true;
-        }
-        runCommond(row, lines[i], res.commonds);
-      }
-      break;
-    default:
-      break;
+  if (!key) {
+    return;
   }
-  if (hasChange) {
+  score = 0;
+  const res = runStep(key);
+  if (res.hasChange) {
     if (score) {
       emit("score", score);
       score = 0;
@@ -245,7 +211,7 @@ const step = () => {
       setTimeout(() => insertRandomBlock(), 200);
     }
   } else {
-    const isLose = blocks.length >= 16;
+    const isLose = isGameOver();
     if (isLose) {
       status.value = GAME_STATUS.gameover;
       emit("gameover");
