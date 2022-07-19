@@ -30,6 +30,8 @@ import { getId, includes, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
 
+let promise = Promise.resolve();
+
 const mock = (): Block[] => [
   { id: getId(), value: 2, position: 0 },
   { id: getId(), value: 2, position: 1 },
@@ -79,7 +81,7 @@ const onKeyUp = (e: KeyboardEvent) => {
   if (includes(key, DIR_KEYS)) {
     stack.push(key);
   }
-  step();
+  promise = promise.then(() => runStep());
 };
 
 const insertRandomBlock = () => {
@@ -102,7 +104,7 @@ const insertRandomBlock = () => {
   blocks.push(block);
 };
 
-const runCommond = (
+const playStep = (
   row: Array<Block | undefined>,
   positions: number[] | readonly number[],
   commonds: Array<{ type: string; data1: number; data2: number }>
@@ -146,7 +148,7 @@ const runCommond = (
   }, 200);
 };
 
-const runStep = (key: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight") => {
+const runCommand = (key: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight") => {
   let hasChange = false;
   const lines = LINE_MAP[key];
   const positionMap: Record<number, Block> = {};
@@ -162,7 +164,7 @@ const runStep = (key: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight") => {
     if (lineChange) {
       hasChange = true;
     }
-    runCommond(row, lines[i] as readonly number[], res.commonds);
+    playStep(row, lines[i] as readonly number[], res.commonds);
   }
   return { hasChange };
 };
@@ -192,7 +194,7 @@ const isGameOver = () => {
   });
 };
 
-const step = () => {
+const runStep = async () => {
   if (status.value !== GAME_STATUS.playing) {
     return;
   }
@@ -200,7 +202,7 @@ const step = () => {
   if (!key) {
     return;
   }
-  const res = runStep(key);
+  const res = runCommand(key);
   if (res.hasChange) {
     const isWin = blocks.find((block) => block.value >= 2048);
     if (isWin) {
@@ -236,7 +238,9 @@ watch(
 onBeforeMount(() => {
   document.addEventListener("keyup", onKeyUp);
 });
-onMounted(() => {start()});
+onMounted(() => {
+  start();
+});
 onBeforeUnmount(() => {
   document.removeEventListener("keyup", onKeyUp);
 });
