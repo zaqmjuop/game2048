@@ -6,6 +6,7 @@
       :key="block.id"
       :count="block.value"
       :position="block.position"
+      :frameTime="frameTime"
     />
     <Win v-if="status === GAME_STATUS.win" @try-again="start" />
     <GameOver v-else-if="status === GAME_STATUS.gameover" @try-again="start" />
@@ -26,6 +27,7 @@ import {
 import { getId, includes, sleep, sleepFrame, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
+import { computed } from "@vue/reactivity";
 
 let promise = Promise.resolve();
 
@@ -66,6 +68,10 @@ const blocks: Block[] = reactive(defaultBlocks());
 const status = ref<valueof<typeof GAME_STATUS>>(GAME_STATUS.playing);
 
 const stack: Array<ArrayElementType<typeof DIR_KEYS>> = reactive([]);
+const DEFAULT_FRAME_TIME = 100;
+const frameTime = computed(() =>
+  Math.trunc(DEFAULT_FRAME_TIME / (stack.length || 1))
+);
 
 const onKeyUp = (e: KeyboardEvent) => {
   if (status.value !== GAME_STATUS.playing) {
@@ -78,7 +84,7 @@ const onKeyUp = (e: KeyboardEvent) => {
   if (includes(key, DIR_KEYS)) {
     stack.push(key);
   }
-  promise = promise.then(() => sleepFrame()).then(() => runStep());
+  promise = promise.then(() => runStep());
 };
 
 const insertRandomBlock = () => {
@@ -104,29 +110,29 @@ const insertRandomBlock = () => {
 const playStep = async (
   row: Array<Block | undefined>,
   positions: number[] | readonly number[],
-  commonds: Array<{ type: string; data1: number; data2: number }>
+  commands: Array<{ type: string; data1: number; data2: number }>
 ) => {
   let score = 0;
-  const mergeCommonds: Array<{ type: string; data1: number; data2: number }> =
+  const mergeCommands: Array<{ type: string; data1: number; data2: number }> =
     [];
-  const silderCommonds: Array<{ type: string; data1: number; data2: number }> =
+  const sliderCommands: Array<{ type: string; data1: number; data2: number }> =
     [];
-  commonds.forEach((commond) => {
-    if (commond.type === "merge") {
-      mergeCommonds.push(commond);
-    } else if (commond.type === "silder") {
-      silderCommonds.push(commond);
+  commands.forEach((command) => {
+    if (command.type === "merge") {
+      mergeCommands.push(command);
+    } else if (command.type === "slider") {
+      sliderCommands.push(command);
     }
   });
   await Promise.all(
-    silderCommonds.map(({ data1, data2 }) => {
+    sliderCommands.map(({ data1, data2 }) => {
       const block = row[data1];
       block && (block.position = positions[data2]);
     })
   );
-  await sleep(200);
+  await sleepFrame();
   await Promise.all(
-    mergeCommonds.map(({ data1, data2 }) => {
+    mergeCommands.map(({ data1, data2 }) => {
       const block1 = row[data1];
       const block2 = row[data2];
       if (block1) {
@@ -159,11 +165,11 @@ const runCommand = async (
         (position) => positionMap[position]
       );
       const res = slideLine(row.map((block) => block?.value || 0));
-      const lineChange = res.commonds.length;
+      const lineChange = res.commands.length;
       if (lineChange) {
         hasChange = true;
       }
-      return playStep(row, line as number[], res.commonds);
+      return playStep(row, line as number[], res.commands);
     })
   );
   return { hasChange };
@@ -208,7 +214,6 @@ const runStep = async () => {
     if (isWin) {
       emit("win");
     } else {
-      await sleepFrame()
       insertRandomBlock();
     }
   } else {
