@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import Count from "./Count.vue";
 import { DIR_KEYS, GAME_STATUS, LINE_MAP, valueof } from "../metaData";
-import { ArrayElementType, Block, Line } from "../type";
+import { ArrayElementType, Block, Command, Line } from "../type";
 import {
   ref,
   reactive,
@@ -110,13 +110,11 @@ const insertRandomBlock = () => {
 const playStep = async (
   row: Array<Block | undefined>,
   positions: number[] | readonly number[],
-  commands: Array<{ type: string; data1: number; data2: number }>
+  commands: Array<Command>
 ) => {
   let score = 0;
-  const mergeCommands: Array<{ type: string; data1: number; data2: number }> =
-    [];
-  const sliderCommands: Array<{ type: string; data1: number; data2: number }> =
-    [];
+  const mergeCommands: Array<Command> = [];
+  const sliderCommands: Array<Command> = [];
   commands.forEach((command) => {
     if (command.type === "merge") {
       mergeCommands.push(command);

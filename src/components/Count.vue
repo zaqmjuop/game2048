@@ -26,9 +26,7 @@ const offset = computed(() => {
 });
 const scale = ref(0);
 
-const onTransitionend = (e) => {
-  console.log(e)
-}
+const onTransitionend = (e: TransitionEvent) => {};
 
 onBeforeMount(() => {
   window.requestAnimationFrame(() => (scale.value = props.count ? 1 : 0));

@@ -8,3 +8,8 @@ export interface Block {
 }
 
 export type Line = [number, number, number, number];
+export interface Command {
+  type: string;
+  data1: number;
+  data2: number;
+}

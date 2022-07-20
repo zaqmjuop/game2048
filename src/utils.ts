@@ -1,4 +1,4 @@
-import { ArrayElementType } from "./type";
+import { ArrayElementType, Command } from "./type";
 
 export const includes = <T extends any[] | readonly any[]>(
   val: any,
@@ -8,7 +8,7 @@ export const includes = <T extends any[] | readonly any[]>(
 };
 
 export const slideLine = (line: number[]) => {
-  const commands: Array<{ type: string; data1: number; data2: number }> = [];
+  const commands: Array<Command> = [];
   const res: number[] = new Array(line.length).fill(0);
   let resI = res.length - 1;
   for (let i = line.length - 1; i >= 0; i--) {
