@@ -1,12 +1,11 @@
 <template>
   <div class="stage">
-    <span v-for="block in 16" class="block"></span>
+    <span v-for="item in 16" class="block"></span>
     <Count
-      v-for="block in blocks"
-      :key="block.id"
-      :count="block.value"
-      :position="block.position"
+      v-for="item in blocks"
+      :key="item.id"
       :frameTime="frameTime"
+      :item="item"
     />
     <Win v-if="status === GAME_STATUS.win" @try-again="start" />
     <GameOver v-else-if="status === GAME_STATUS.gameover" @try-again="start" />
@@ -28,29 +27,30 @@ import { getId, includes, sleep, sleepFrame, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
 import { computed } from "@vue/reactivity";
+import { CountBlock } from "../Item/count";
 
 let promise = Promise.resolve();
 
-const mock = (): Block[] => [
-  { id: getId(), value: 2, position: 0 },
-  { id: getId(), value: 2, position: 1 },
-  { id: getId(), value: 3, position: 2 },
-  { id: getId(), value: 4, position: 3 },
-  { id: getId(), value: 5, position: 4 },
-  { id: getId(), value: 6, position: 5 },
-  { id: getId(), value: 7, position: 6 },
-  { id: getId(), value: 8, position: 7 },
-  { id: getId(), value: 9, position: 8 },
-  { id: getId(), value: 10, position: 9 },
-  { id: getId(), value: 11, position: 10 },
-  { id: getId(), value: 12, position: 11 },
-  { id: getId(), value: 13, position: 12 },
-  { id: getId(), value: 14, position: 13 },
-  { id: getId(), value: 15, position: 14 },
-  { id: getId(), value: 16, position: 15 },
+const mock = (): CountBlock[] => [
+  CountBlock.of({ value: 2, position: 0 }),
+  CountBlock.of({ value: 2, position: 1 }),
+  CountBlock.of({ value: 3, position: 2 }),
+  CountBlock.of({ value: 4, position: 3 }),
+  CountBlock.of({ value: 5, position: 4 }),
+  CountBlock.of({ value: 6, position: 5 }),
+  CountBlock.of({ value: 7, position: 6 }),
+  CountBlock.of({ value: 8, position: 7 }),
+  CountBlock.of({ value: 9, position: 8 }),
+  CountBlock.of({ value: 10, position: 9 }),
+  CountBlock.of({ value: 11, position: 10 }),
+  CountBlock.of({ value: 12, position: 11 }),
+  CountBlock.of({ value: 13, position: 12 }),
+  CountBlock.of({ value: 14, position: 13 }),
+  CountBlock.of({ value: 15, position: 14 }),
+  CountBlock.of({ value: 16, position: 15 }),
 ];
 
-const defaultBlocks = (): Block[] => [];
+const defaultBlocks = (): CountBlock[] => [];
 
 const props = defineProps<{
   triggerStart: boolean;
@@ -63,7 +63,7 @@ const emit = defineEmits<{
   (e: "gameover"): void;
 }>();
 
-const blocks: Block[] = reactive(defaultBlocks());
+const blocks = reactive<CountBlock[]>(defaultBlocks());
 
 const status = ref<valueof<typeof GAME_STATUS>>(GAME_STATUS.playing);
 
@@ -99,16 +99,12 @@ const insertRandomBlock = () => {
   });
   const i = Math.trunc(Math.random() * positions.length);
   const flag = positions[i];
-  const block: Block = {
-    id: getId(),
-    value: 2,
-    position: flag,
-  };
-  blocks.push(block);
+
+  blocks.push(CountBlock.of({ value: 2, position: flag }));
 };
 
 const playStep = async (
-  row: Array<Block | undefined>,
+  row: Array<CountBlock | undefined>,
   positions: number[] | readonly number[],
   commands: Array<Command>
 ) => {
@@ -153,13 +149,13 @@ const runCommand = async (
 ) => {
   let hasChange = false;
   const lines = LINE_MAP[key];
-  const positionMap: Record<number, Block> = {};
+  const positionMap: Record<number, CountBlock> = {};
   blocks.forEach((block) => {
     positionMap[block.position] = block;
   });
   await Promise.all(
     lines.map(async (line) => {
-      const row: Array<Block | undefined> = line.map(
+      const row: Array<CountBlock | undefined> = line.map(
         (position) => positionMap[position]
       );
       const res = slideLine(row.map((block) => block?.value || 0));

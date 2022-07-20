@@ -7,29 +7,37 @@
     }"
     @transitionend="onTransitionend"
   >
-    <p class="count">{{ count }}</p>
+    <p class="count">{{ item.value }}</p>
   </span>
 </template>
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from "vue";
+import { CountBlock } from "../Item/count";
 
 const props = defineProps<{
-  count: number;
-  position: number;
+  item: CountBlock;
   frameTime: number;
 }>();
 
 const offset = computed(() => {
-  const left = props.position % 4;
-  const top = (props.position - left) / 4;
+  const left = props.item.position % 4;
+  const top = (props.item.position - left) / 4;
   return { left, top };
 });
 const scale = ref(0);
 
-const onTransitionend = (e: TransitionEvent) => {};
+let resolver: Function | undefined;
+
+const promise = new Promise((resolve) => {
+  resolver = resolve;
+});
+
+const onTransitionend = (e: TransitionEvent) => {
+  resolver && resolver(0);
+};
 
 onBeforeMount(() => {
-  window.requestAnimationFrame(() => (scale.value = props.count ? 1 : 0));
+  window.requestAnimationFrame(() => (scale.value = props.item.value ? 1 : 0));
 });
 </script>
 <style lang="scss" scoped>
