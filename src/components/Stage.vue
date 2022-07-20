@@ -23,13 +23,13 @@ import {
   watch,
   onMounted,
 } from "vue";
-import { getId, includes, sleep, sleepFrame, slideLine } from "../utils";
+import { includes, sleep, slideLine } from "../utils";
 import Win from "./Win.vue";
 import GameOver from "./GameOver.vue";
 import { computed } from "@vue/reactivity";
 import { CountBlock } from "../Item/count";
 
-let promise = Promise.resolve();
+let promise: Promise<any> = Promise.resolve();
 
 const mock = (): CountBlock[] => [
   CountBlock.of({ value: 2, position: 0 }),
@@ -81,10 +81,10 @@ const onKeyUp = (e: KeyboardEvent) => {
     return;
   }
   const key = e.key;
-  if (includes(key, DIR_KEYS)) {
+  if (includes(key, DIR_KEYS) && stack.length < 3) {
     stack.push(key);
+    promise = promise.then(() => runStep());
   }
-  promise = promise.then(() => runStep());
 };
 
 const insertRandomBlock = () => {
@@ -118,29 +118,28 @@ const playStep = async (
       sliderCommands.push(command);
     }
   });
-  await Promise.all(
-    sliderCommands.map(({ data1, data2 }) => {
-      const block = row[data1];
-      block && (block.position = positions[data2]);
-    })
-  );
-  await sleepFrame();
-  await Promise.all(
-    mergeCommands.map(({ data1, data2 }) => {
-      const block1 = row[data1];
-      const block2 = row[data2];
-      if (block1) {
-        const index = blocks.indexOf(block1);
-        if (index > -1) {
-          blocks.splice(index, 1);
-        }
+  sliderCommands.map(({ data1, data2 }) => {
+    const block = row[data1];
+    if (block) {
+      block.position = positions[data2];
+    }
+  });
+  sliderCommands.length && (await sleep(frameTime.value));
+  mergeCommands.map(({ data1, data2 }) => {
+    const block1 = row[data1];
+    const block2 = row[data2];
+    if (block1) {
+      const index = blocks.indexOf(block1);
+      if (index > -1) {
+        blocks.splice(index, 1);
       }
-      if (block2) {
-        block2.value *= 2;
-        score += block2.value;
-      }
-    })
-  );
+    }
+    if (block2) {
+      block2.value *= 2;
+      score += block2.value;
+    }
+  });
+  mergeCommands.length && (await sleep(frameTime.value));
   emit("score", score);
 };
 
@@ -209,6 +208,7 @@ const runStep = async () => {
       emit("win");
     } else {
       insertRandomBlock();
+      await sleep(frameTime.value);
     }
   } else {
     const isLose = isGameOver();

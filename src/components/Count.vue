@@ -5,7 +5,6 @@
       transform: `translate(${offset.left}00%, ${offset.top}00%) scale(${scale})`,
       'transition-duration': `${frameTime}ms`,
     }"
-    @transitionend="onTransitionend"
   >
     <p class="count">{{ item.value }}</p>
   </span>
@@ -25,16 +24,6 @@ const offset = computed(() => {
   return { left, top };
 });
 const scale = ref(0);
-
-let resolver: Function | undefined;
-
-const promise = new Promise((resolve) => {
-  resolver = resolve;
-});
-
-const onTransitionend = (e: TransitionEvent) => {
-  resolver && resolver(0);
-};
 
 onBeforeMount(() => {
   window.requestAnimationFrame(() => (scale.value = props.item.value ? 1 : 0));

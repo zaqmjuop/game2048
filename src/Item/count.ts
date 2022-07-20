@@ -1,16 +1,27 @@
-import { getId } from "../utils";
+import { createIdGetter } from "../utils";
 
 export interface CountBlockState {
   value: number;
   position: number;
 }
 
+export const getId = createIdGetter();
+
+const countRecord: Record<string, CountBlock> = {};
+
 export class CountBlock {
   static of(data: CountBlockState) {
     return new CountBlock(data);
   }
-  promise: Promise<any> | null = null;
-  resolver: ((value: unknown) => void) | null = null;
+
+  static findById(id: string): CountBlock | undefined {
+    return countRecord[id];
+  }
+
+  static delete(id: string) {
+    delete countRecord[id];
+  }
+
   public readonly id = getId();
   value: number;
   position: number;
@@ -18,14 +29,8 @@ export class CountBlock {
     this.value = data.value;
     this.position = data.position;
   }
-  setState(data: Partial<CountBlockState>) {
-    this.promise = new Promise((resolve) => {
-      this.resolver = resolve;
-    }).then(() => {
-      this.promise = null;
-      this.resolver = null;
-    });
-    Object.assign(this, data);
-    return this.promise;
+
+  destroy() {
+    return CountBlock.delete(this.id);
   }
 }
