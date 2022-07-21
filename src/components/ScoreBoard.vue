@@ -2,13 +2,25 @@
   <div class="score-board">
     <h6>{{ label }}</h6>
     <p>{{ score }}</p>
+    <!-- <Bullet ref="bullet" /> -->
   </div>
 </template>
 <script setup lang="ts">
+import { ref, watch } from "@vue/runtime-core";
+import Bullet from "./Bullet.vue";
 const props = defineProps<{
   label: string;
   score: number;
 }>();
+
+const bullet = ref<typeof Bullet | null>(null);
+
+watch(
+  () => props.score,
+  (val, prev) => {
+    bullet.value?.shot(val - prev);
+  }
+);
 </script>
 <style lang="scss" scoped>
 .score-board {
@@ -20,6 +32,7 @@ const props = defineProps<{
   display: inline-block;
   padding-bottom: 8px;
   margin-left: 5px;
+  position: relative;
 }
 h6 {
   color: #ede4da;
@@ -32,5 +45,5 @@ p {
   font-weight: 700;
   font-size: 24px;
   line-height: 24px;
-} 
+}
 </style>
