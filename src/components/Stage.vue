@@ -68,7 +68,7 @@ const blocks = reactive<CountBlock[]>(defaultBlocks());
 const status = ref<valueof<typeof GAME_STATUS>>(GAME_STATUS.playing);
 
 const stack: Array<ArrayElementType<typeof DIR_KEYS>> = reactive([]);
-const DEFAULT_FRAME_TIME = 100;
+const DEFAULT_FRAME_TIME = 200;
 const frameTime = computed(() =>
   Math.trunc(DEFAULT_FRAME_TIME / (stack.length || 1))
 );

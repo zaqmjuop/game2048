@@ -10,7 +10,7 @@
   </span>
 </template>
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { CountBlock } from "../Item/count";
 
 const props = defineProps<{
@@ -25,7 +25,7 @@ const offset = computed(() => {
 });
 const scale = ref(0);
 
-onBeforeMount(() => {
+onMounted(() => {
   window.requestAnimationFrame(() => (scale.value = props.item.value ? 1 : 0));
 });
 </script>
